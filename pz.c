@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-//novi tip adresa
+//novi tip adrese
 typedef struct adresa
 {
     char ulica[40];
@@ -10,7 +10,7 @@ typedef struct adresa
     char grad[40];
 } ADRESA;
 
-//novi tip cvor_st
+//novi tip kontakta (recicemo kontakta jer je cvor_st podaci o kontaktu)
 typedef struct cvor_st
 {
     char ime_kontakta[50];
@@ -22,10 +22,10 @@ typedef struct cvor_st
     struct cvor_st *levi;  //levi pokazuje vrednost cvor_st
     struct cvor_st *desni; //desni pokazuje vrednost cvor_st
 } BCVOR;
-//tip_broja
+
+//bira se tip broja Mobilni, fiksni, posao, kuca(tip)
 void tip_broja(int tip)
 {
-
     switch (tip)
     {
     case 1:
@@ -53,13 +53,14 @@ void dodaj_u_stablo(BCVOR *novi, BCVOR **pkoren)
     }
     else
     {
+        //string compare uporedjivanje stringova (karaktera)
         if (strcmp(novi->ime_kontakta, (*pkoren)->ime_kontakta) < 0)
             dodaj_u_stablo(novi, &(*pkoren)->levi);
         else
             dodaj_u_stablo(novi, &(*pkoren)->desni);
     }
 }
-//ispisivanje kontakta
+//ispisivanje kontakta celog kontakta
 void ispisi_jedan_kontakt(BCVOR *kontakt)
 {
     printf("_______________________________\n");
@@ -78,10 +79,8 @@ void ispisi_stablo(BCVOR *koren) //koren pokazuje na BCVOR sto znaci da ce ispis
 {
     if (koren != NULL)
     {
-
         ispisi_stablo(koren->levi);
         ispisi_jedan_kontakt(koren);
-        //printf("_______________________________\n");
         ispisi_stablo(koren->desni);
     }
 }
@@ -204,14 +203,14 @@ BCVOR *unesi_podatke_iz_fajla(char *ime_fajla)
     fclose(f);
     return root;
 }
-//cuvanje stabla
+//cuvanje stabla u fajlu
 void sacuvaj_stablo_u_fajl(char *ime_fajla, BCVOR *root)
 {
 
     if (root != NULL)
     {
 
-        FILE *x = fopen(ime_fajla, "a");
+        FILE *x = fopen(ime_fajla, "a"); //appends
         fprintf(x, "%s %s %s %d %s %s %s\n",
                 root->ime_kontakta,
                 root->prezime_kontakta,
@@ -247,7 +246,7 @@ BCVOR novi_podaci()
     //tip
     printf("Odaberite opciju tipa telefona: \n ");
     printf("-MOBILNI = 1,\n -FIKSNI = 2,\n -POSAO = 3,\n -KUCA = 4\n ");
-    
+
     scanf("%d", &temp.tip);
     printf("_______________________________\n");
     //adresa
@@ -273,7 +272,7 @@ void nadji_korisnika_po_imenu(BCVOR *imenik, char *ime_kontakta, int *uspehPretr
     if (imenik != NULL)
     {
         nadji_korisnika_po_imenu(imenik->levi, ime_kontakta, uspehPretrageImena);
-        if (strcmp(ime_kontakta, imenik->ime_kontakta) == 0)
+        if (strcmp(ime_kontakta, imenik->ime_kontakta) == 0) //kada je jednako nula to znaci da je pronadjen kontakt
         {
             ispisi_jedan_kontakt(imenik);
             *uspehPretrageImena = 1;
@@ -297,14 +296,13 @@ void nadji_korisnika_po_broju(BCVOR *imenik, char *broj_kontakta, int *uspehPret
         nadji_korisnika_po_broju(imenik->desni, broj_kontakta, uspehPretrage);
     }
 }
-//minimalna vrednost cvora
+//minimalna vrednost cvora (kada je minimalna vrednost cvora, onda se bcvor ili trenutni cvor nalazi u levoj strani)
 BCVOR *minValueNode(BCVOR *node)
 {
     BCVOR *current = node;
 
     while (current->levi != NULL)
         current = current->levi;
-
     return current;
 }
 
@@ -313,15 +311,14 @@ BCVOR *deleteNode(BCVOR *root, char *key, int *uspeh)
 {
     if (root == NULL)
         return root;
-
     printf(" %s, %s\n", key, root->broj_kontakta);
 
+    //kada je uporedjivanje char-ova, gleda se koji je veci i na osnovu toga se prelazi na levu ili desnu stranu stabla
     if (strcmp(key, root->broj_kontakta) < 0)
         root->levi = deleteNode(root->levi, key, uspeh); //brisanje iz levog cvora
 
     else if (strcmp(key, root->broj_kontakta) > 0)
-        root->desni = deleteNode(root->desni, key, uspeh); //brisanje iz desnog
-
+        root->desni = deleteNode(root->desni, key, uspeh); //brisanje iz desnog cvora
     else
     {
 
@@ -335,7 +332,6 @@ BCVOR *deleteNode(BCVOR *root, char *key, int *uspeh)
 
         else if (root->desni == NULL)
         {
-
             BCVOR *temp = root->levi;
             free(root);
             *uspeh = 1;
@@ -343,23 +339,19 @@ BCVOR *deleteNode(BCVOR *root, char *key, int *uspeh)
         }
         BCVOR *temp = minValueNode(root->desni);
         strcpy(root->broj_kontakta, temp->broj_kontakta);
-
         root->desni = deleteNode(root->desni, temp->broj_kontakta, uspeh);
     }
     return root;
 }
 //pokretacka funkcija
 int main()
-{
-    //Ovo je zapravo root, ili koren stabla
+{ //Ovo je zapravo root, ili koren stabla
     BCVOR *imenik = NULL;
     imenik = unesi_podatke_iz_fajla("korisnici.txt");
     int opcija;
 
     do
     {
-        //printf("_______________________________\n");
-
         printf("[1.] Pretraga korisnika na osnovu imena\n");
         printf("[2.] Pretraga korisnika na osnovu broja\n");
         printf("[3.] Ispis stabla\n");
@@ -369,14 +361,17 @@ int main()
         printf("[7.] Azuriranje postojeceg korisnika\n");
 
         scanf("%d", &opcija);
+
         char zadato_ime[100];
         int unos;
         char zadati_broj[40];
         int uspehBrisanja = 0;
         int uspehPretrage = 0;
         int uspehImena = 0;
+
         BCVOR novi;
         FILE *input = NULL;
+
         switch (opcija)
         {
         case 1:
@@ -388,7 +383,6 @@ int main()
             else
                 printf("Korisnik postoji!\n");
             printf("_______________________________\n");
-
             break;
 
         case 2:
@@ -398,12 +392,10 @@ int main()
             nadji_korisnika_po_broju(imenik, zadati_broj, &uspehPretrage);
             if (uspehPretrage == 0)
                 printf("Korisik nije pronadjen!\n");
-
             else
                 printf("Korisnik je pronadjen!\n");
             printf("_______________________________\n");
             uspehPretrage = 1;
-
             break;
 
         case 3:
@@ -414,8 +406,8 @@ int main()
             novi = novi_podaci();
             dodaj_u_stablo(&novi, &imenik);
             break;
-        case 5:
 
+        case 5:
             printf(" Da li zelite u isti fajl da upisete?\n[korisnici.txt]\n[1/0]");
             scanf("%d", &unos);
             if (unos != 0)
@@ -425,15 +417,8 @@ int main()
                 fclose(input);
                 sacuvaj_stablo_u_fajl("korisnici.txt", imenik);
             }
-            /*else
-            {
-                char *filename;
-                printf(" Unesite ime novog fajla:");
-                scanf("%s", filename);
-                sacuvaj_stablo_u_fajl(filename, imenik);
-            }         
-           */
             break;
+
         case 6:
             printf("Unesite broj telefona za brisanje: \n");
             scanf("%s", zadati_broj);
